@@ -1,0 +1,113 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Dental Camera App</title>  
+    <style>  
+        body {  
+            font-family: Arial, sans-serif;  
+            display: flex;  
+            flex-direction: column;  
+            align-items: center;  
+            background-color: #f0f0f0;  
+            margin: 0;  
+            padding: 20px;  
+        }  
+        .grid-container {  
+            display: grid;  
+            grid-template-columns: repeat(3, 1fr);  
+            gap: 10px;  
+            max-width: 900px;  
+        }  
+        .grid-item {  
+            border: 1px solid #ccc;  
+            padding: 10px;  
+            text-align: center;  
+            background-color: white;  
+        }  
+        .center-item {  
+            grid-column: 2;  
+            grid-row: 2;  
+        }  
+        img, video {  
+            max-width: 100%;  
+            height: auto;  
+        }  
+        button {  
+            font-size: 18px;  
+            padding: 10px 20px;  
+            background-color: #4CAF50;  
+            color: white;  
+            border: none;  
+            cursor: pointer;  
+            margin-top: 20px;  
+        }  
+        button:hover {  
+            background-color: #45a049;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <div class="grid-container">  
+        <div class="grid-item" id="side-view">Góc nghiêng</div>  
+        <div class="grid-item" id="front-view">Nhìn thẳng</div>  
+        <div class="grid-item" id="smile-view">Nhìn thẳng cười</div>  
+        <div class="grid-item" id="upper-jaw">Hàm trên</div>  
+        <div class="grid-item center-item">  
+            <video id="video" width="300" height="225" autoplay></video>  
+        </div>  
+        <div class="grid-item" id="lower-jaw">Hàm dưới</div>  
+        <div class="grid-item" id="left-view">Nghiêng trái</div>  
+        <div class="grid-item" id="front-view-2">Nhìn thẳng</div>  
+        <div class="grid-item" id="right-view">Nghiêng phải</div>  
+    </div>  
+    <button id="capture">Chụp ảnh</button>  
+
+    <script>  
+        const video = document.getElementById('video');  
+        const captureButton = document.getElementById('capture');  
+        const gridItems = document.querySelectorAll('.grid-item:not(.center-item)');  
+
+        let currentCaptureIndex = 0;  
+        const captureOrder = [  
+            'side-view', 'front-view', 'smile-view', 'upper-jaw',  
+            'lower-jaw', 'left-view', 'front-view-2', 'right-view'  
+        ];  
+
+        // Truy cập camera  
+        navigator.mediaDevices.getUserMedia({ video: true })  
+            .then(stream => {  
+                video.srcObject = stream;  
+            })  
+            .catch(err => {  
+                console.error("Không thể truy cập camera: ", err);  
+            });  
+
+        // Xử lý sự kiện khi nhấn nút chụp hình  
+        captureButton.addEventListener('click', () => {  
+            if (currentCaptureIndex < captureOrder.length) {  
+                const canvas = document.createElement('canvas');  
+                canvas.width = video.videoWidth;  
+                canvas.height = video.videoHeight;  
+                canvas.getContext('2d').drawImage(video, 0, 0);  
+                
+                const imageDataUrl = canvas.toDataURL('image/jpeg');  
+                const img = document.createElement('img');  
+                img.src = imageDataUrl;  
+                
+                const currentItem = document.getElementById(captureOrder[currentCaptureIndex]);  
+                currentItem.innerHTML = '';  
+                currentItem.appendChild(img);  
+                
+                currentCaptureIndex++;  
+                
+                if (currentCaptureIndex === captureOrder.length) {  
+                    captureButton.disabled = true;  
+                    captureButton.textContent = 'Đã chụp xong';  
+                }  
+            }  
+        });  
+    </script>  
+</body>  
+</html>
