@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... existing head content ... -->
+</head>
+<body>
+    <div class="grid-container">
+        <div class="grid-item" id="side-view">
+            Góc nghiêng
+            <button class="edit-button">Edit</button>
+        </div>
+        <div class="grid-item" id="front-view">
+            Nhìn thẳng
+            <button class="edit-button">Edit</button>
+        </div>
+        <!-- ... other grid items ... -->
+    </div>
+    <!-- ... existing body content ... -->
+
+    <script>
+        // ... existing JavaScript code ...
+
+        // Add event listener to each edit button
+        const editButtons = document.querySelectorAll('.edit-button');
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Capture new image and replace the existing one
+                const parentItem = button.parentElement;
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                const imageDataUrl = canvas.toDataURL('image/jpeg');
+                const img = document.createElement('img');
+                img.src = imageDataUrl;
+                
+                parentItem.innerHTML = '';
+                parentItem.appendChild(img);
+                parentItem.appendChild(button);
+            });
+        });
+    </script>
+</body>
+</html>
