@@ -1,44 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... existing head content ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Camera App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 900px;
+        }
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            background-color: white;
+        }
+        .center-item {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        img, video {
+            max-width: 100%;
+            height: auto;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .edit-btn {
+            font-size: 14px;
+            padding: 5px 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .edit-btn:hover {
+            background-color: #007B9A;
+        }
+    </style>
 </head>
 <body>
     <div class="grid-container">
-        <div class="grid-item" id="side-view">
-            Góc nghiêng
-            <button class="edit-button">Edit</button>
+        <div class="grid-item" id="side-view">Góc nghiêng</div>
+        <div class="grid-item" id="front-view">Nhìn thẳng</div>
+        <div class="grid-item" id="smile-view">Nhìn thẳng cười</div>
+        <div class="grid-item" id="upper-jaw">Hàm trên</div>
+        <div class="grid-item center-item">
+            <video id="video" width="300" height="225" autoplay></video>
         </div>
-        <div class="grid-item" id="front-view">
-            Nhìn thẳng
-            <button class="edit-button">Edit</button>
-        </div>
-        <!-- ... other grid items ... -->
+        <div class="grid-item" id="lower-jaw">Hàm dưới</div>
+        <div class="grid-item" id="left-view">Nghiêng trái</div>
+        <div class="grid-item" id="front-view-2">Nhìn thẳng</div>
+        <div class="grid-item" id="right-view">Nghiêng phải</div>
     </div>
-    <!-- ... existing body content ... -->
+    <button id="capture">Chụp ảnh</button>
 
     <script>
-        // ... existing JavaScript code ...
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture');
+        const gridItems = document.querySelectorAll('.grid-item:not(.center-item)');
 
-        // Add event listener to each edit button
-        const editButtons = document.querySelectorAll('.edit-button');
-        editButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Capture new image and replace the existing one
-                const parentItem = button.parentElement;
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                
-                const imageDataUrl = canvas.toDataURL('image/jpeg');
-                const img = document.createElement('img');
-                img.src = imageDataUrl;
-                
-                parentItem.innerHTML = '';
-                parentItem.appendChild(img);
-                parentItem.appendChild(button);
+        let currentCaptureIndex = 0;
+        const captureOrder = [
+            'side-view', 'front-view', 'smile-view', 'upper-jaw',
+            'lower-jaw', 'left-view', 'front-view-2', 'right-view'
+        ];
+
+        // Truy cập camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Không thể truy cập camera: ", err);
             });
+
+        function captureImage(targetElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const imageDataUrl = canvas.toDataURL('image/jpeg');
+            const img = document.createElement('img');
+            img.src = imageDataUrl;
+            
+            targetElement.innerHTML = '';
+            targetElement.appendChild(img);
+            targetElement.appendChild(createEditButton());
+        }
+
+        function createEditButton() {
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.className = 'edit-btn';
+            editBtn.addEventListener('click', function() {
+                captureImage(this.parentElement);
+            });
+            return editBtn;
+        }
+
+        // Xử lý sự kiện khi nhấn nút chụp hình
+        captureButton.addEventListener('click', () => {
+            if (currentCaptureIndex < captureOrder.length) {
+                const currentItem = document.getElementById(captureOrder[currentCaptureIndex]);
+                captureImage(currentItem);
+                
+                currentCaptureIndex++;
+                
+                if (currentCaptureIndex === captureOrder.length) {
+                    captureButton.disabled = true;
+                    captureButton.textContent = 'Đã chụp xong';
+                }
+            }
+        });
+
+        // Add edit buttons to existing grid items
+        gridItems.forEach(item => {
+            item.appendChild(createEditButton());
         });
     </script>
 </body>
